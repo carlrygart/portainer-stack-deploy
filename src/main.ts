@@ -1,16 +1,23 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
+import deployStack from './deployStack'
 
-async function run(): Promise<void> {
+export async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
+    const portainerHost: string = core.getInput('portainer-host')
+    const username: string = core.getInput('username')
+    const password: string = core.getInput('password')
+    const stackName: string = core.getInput('stack-name')
+    const stackDefinitionFile: string = core.getInput('stack-definition')
+    const image: string = core.getInput('image')
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
-
-    core.setOutput('time', new Date().toTimeString())
+    await deployStack({
+      portainerHost,
+      username,
+      password,
+      stackName,
+      stackDefinitionFile,
+      image
+    })
   } catch (error) {
     core.setFailed(error.message)
   }

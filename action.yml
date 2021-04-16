@@ -1,11 +1,30 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Deploy a Portainer stack'
+description: 'Github Action to deploy a stack to a Portainer instance'
+author: 'Carl Rygart <carlrygart>'
+branding:
+  icon: 'cloud'
+  color: 'blue'
+
 inputs:
-  milliseconds: # change this
+  portainer-host:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: 'Portainer host, eg. https://myportainer.instance.com'
+  username:
+    required: true
+    description: 'Username for the Portainer login. NOTE: Do not use admin account! Create a new CI specific login'
+  password:
+    required: true
+    description: 'Password for the Portainer login'
+  stack-name:
+    required: true
+    description: 'Name for the Portainer stack'
+  stack-definition:
+    required: true
+    description: 'The path to the docker-compose stack stack definition file, eg. stack-definition.yml'
+  image:
+    required: true
+    description: 'The URI of the container image to insert into the stack definition, eg. docker.pkg.github.com/username/repo/master'
+
 runs:
   using: 'node12'
   main: 'dist/index.js'
