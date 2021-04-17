@@ -2,7 +2,13 @@
   "name": "portainer-stack-deploy",
   "version": "1.0.0",
   "description": "Github Action to deploy a stack to a Portainer instance",
+  "author": "Carl Rygart <carlrygart>",
+  "license": "MIT",
   "main": "lib/main.js",
+  "keywords": [
+    "actions",
+    "node"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.publish.json",
     "format": "prettier --write **/*.ts",
@@ -12,13 +18,6 @@
     "test": "jest",
     "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
   },
-  "keywords": [
-    "actions",
-    "node",
-    "setup"
-  ],
-  "author": "Carl Rygart <carlrygart>",
-  "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.2.7",
     "mappersmith": "^2.34.0"
