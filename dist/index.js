@@ -220,13 +220,27 @@ const core = __importStar(__nccwpck_require__(186));
 const deployStack_1 = __importDefault(__nccwpck_require__(90));
 async function run() {
     try {
-        const portainerHost = core.getInput('portainer-host');
-        const username = core.getInput('username');
-        const password = core.getInput('password');
-        const swarmId = core.getInput('swarm-id');
-        const stackName = core.getInput('stack-name');
-        const stackDefinitionFile = core.getInput('stack-definition');
-        const image = core.getInput('image');
+        const portainerHost = core.getInput('portainer-host', {
+            required: true
+        });
+        const username = core.getInput('username', {
+            required: true
+        });
+        const password = core.getInput('password', {
+            required: true
+        });
+        const swarmId = core.getInput('swarm-id', {
+            required: false
+        });
+        const stackName = core.getInput('stack-name', {
+            required: true
+        });
+        const stackDefinitionFile = core.getInput('stack-definition', {
+            required: true
+        });
+        const image = core.getInput('image', {
+            required: false
+        });
         await deployStack_1.default({
             portainerHost,
             username,

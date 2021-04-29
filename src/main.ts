@@ -3,13 +3,27 @@ import deployStack from './deployStack'
 
 export async function run(): Promise<void> {
   try {
-    const portainerHost: string = core.getInput('portainer-host')
-    const username: string = core.getInput('username')
-    const password: string = core.getInput('password')
-    const swarmId: string = core.getInput('swarm-id')
-    const stackName: string = core.getInput('stack-name')
-    const stackDefinitionFile: string = core.getInput('stack-definition')
-    const image: string = core.getInput('image')
+    const portainerHost: string = core.getInput('portainer-host', {
+      required: true
+    })
+    const username: string = core.getInput('username', {
+      required: true
+    })
+    const password: string = core.getInput('password', {
+      required: true
+    })
+    const swarmId: string = core.getInput('swarm-id', {
+      required: false
+    })
+    const stackName: string = core.getInput('stack-name', {
+      required: true
+    })
+    const stackDefinitionFile: string = core.getInput('stack-definition', {
+      required: true
+    })
+    const image: string = core.getInput('image', {
+      required: false
+    })
 
     await deployStack({
       portainerHost,
