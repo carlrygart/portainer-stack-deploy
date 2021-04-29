@@ -6,6 +6,7 @@ export async function run(): Promise<void> {
     const portainerHost: string = core.getInput('portainer-host')
     const username: string = core.getInput('username')
     const password: string = core.getInput('password')
+    const swarmId: string = core.getInput('swarm-id')
     const stackName: string = core.getInput('stack-name')
     const stackDefinitionFile: string = core.getInput('stack-definition')
     const image: string = core.getInput('image')
@@ -14,6 +15,7 @@ export async function run(): Promise<void> {
       portainerHost,
       username,
       password,
+      swarmId,
       stackName,
       stackDefinitionFile,
       image

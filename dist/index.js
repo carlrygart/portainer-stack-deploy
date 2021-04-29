@@ -71,6 +71,11 @@ function createPortainerApi({ host }) {
                     path: '/stacks',
                     middleware: [AccessTokenMiddleware]
                 },
+                createStack: {
+                    path: '/stacks',
+                    method: 'post',
+                    middleware: [AccessTokenMiddleware]
+                },
                 updateStack: {
                     path: '/stacks/{id}',
                     method: 'put',
@@ -116,8 +121,31 @@ const api_1 = __importDefault(__nccwpck_require__(947));
 const path_1 = __importDefault(__nccwpck_require__(622));
 const fs_1 = __importDefault(__nccwpck_require__(747));
 const core = __importStar(__nccwpck_require__(186));
-async function deployStack({ portainerHost, username, password, stackName, stackDefinitionFile, image }) {
+var StackType;
+(function (StackType) {
+    StackType[StackType["SWARM"] = 1] = "SWARM";
+    StackType[StackType["COMPOSE"] = 2] = "COMPOSE";
+})(StackType || (StackType = {}));
+function generateNewStackDefinition(stackDefinitionFile, image) {
+    const stackDefFilePath = path_1.default.join(process.env.GITHUB_WORKSPACE, stackDefinitionFile);
+    core.info(`Reading stack definition file from ${stackDefFilePath}`);
+    const stackDefinition = fs_1.default.readFileSync(stackDefFilePath, 'utf8');
+    if (!stackDefinition) {
+        throw new Error(`Could not find stack-definition file: ${stackDefFilePath}`);
+    }
+    if (!image) {
+        core.info(`No new image provided, using existing stack definition`);
+        return stackDefinition;
+    }
+    const imageWithoutTag = image.substring(0, image.indexOf(':'));
+    core.info(`Inserts ${image} into the stack definition`);
+    return stackDefinition.replace(new RegExp(`${imageWithoutTag}(:.*)?\n`), `${image}\n`);
+}
+async function deployStack({ portainerHost, username, password, swarmId, stackName, stackDefinitionFile, image }) {
     const portainerApi = api_1.default({ host: `${portainerHost}/api` });
+    const stackDefinitionToDeploy = generateNewStackDefinition(stackDefinitionFile, image);
+    core.debug(stackDefinitionToDeploy);
+    core.info(`Logging in to Portainer instance`);
     await portainerApi.Auth.login({
         body: {
             username,
@@ -125,26 +153,34 @@ async function deployStack({ portainerHost, username, password, stackName, stack
         }
     });
     const allStacks = (await portainerApi.Stacks.all()).data();
-    const stack = allStacks.find((s) => s.Name === stackName);
-    if (!stack) {
-        throw new Error(`Could not find stack-name: ${stackName}`);
+    const existingStack = allStacks.find((s) => s.Name === stackName);
+    if (existingStack) {
+        core.info(`Found existing stack with name: ${stackName}`);
+        core.debug('Updating existing stack...');
+        await portainerApi.Stacks.updateStack({
+            id: existingStack.Id,
+            endpointId: existingStack.EndpointId,
+            body: {
+                stackFileContent: stackDefinitionToDeploy
+            }
+        });
+        core.info('Successfully updated existing stack');
     }
-    const stackDefFilePath = path_1.default.join(process.env.GITHUB_WORKSPACE, stackDefinitionFile);
-    const stackDefinition = fs_1.default.readFileSync(stackDefFilePath, 'utf8');
-    if (!stackDefinition) {
-        throw new Error(`Could not find stack-definition file: ${stackDefFilePath}`);
+    else {
+        core.debug('Deploying new stack...');
+        await portainerApi.Stacks.createStack({
+            type: swarmId ? StackType.SWARM : StackType.COMPOSE,
+            method: 'string',
+            endpointId: 1,
+            body: {
+                name: stackName,
+                stackFileContent: stackDefinitionToDeploy,
+                swarmID: swarmId ? swarmId : undefined
+            }
+        });
+        core.info(`Successfully created new stack with name: ${stackName}`);
     }
-    const imageWithoutTag = image.substring(0, image.indexOf(':'));
-    const stackDefinitionToDeploy = stackDefinition.replace(new RegExp(`${imageWithoutTag}(:.*)?\n`), `${image}\n`);
-    core.debug('Deploying new stack definition');
-    core.debug(stackDefinitionToDeploy);
-    await portainerApi.Stacks.updateStack({
-        id: stack.Id,
-        endpointId: stack.EndpointId,
-        body: {
-            stackFileContent: stackDefinitionToDeploy
-        }
-    });
+    core.info(`Logging out from Portainer instance`);
     await portainerApi.Auth.logout();
 }
 exports.default = deployStack;
@@ -187,6 +223,7 @@ async function run() {
         const portainerHost = core.getInput('portainer-host');
         const username = core.getInput('username');
         const password = core.getInput('password');
+        const swarmId = core.getInput('swarm-id');
         const stackName = core.getInput('stack-name');
         const stackDefinitionFile = core.getInput('stack-definition');
         const image = core.getInput('image');
@@ -194,6 +231,7 @@ async function run() {
             portainerHost,
             username,
             password,
+            swarmId,
             stackName,
             stackDefinitionFile,
             image

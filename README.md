@@ -4,18 +4,21 @@
 
 # Portainer Stack Deploy
 
-Portainer-stack-deploy is a GitHub Action for deploying a newly updated stack to a Portainer instance. This action is useful when you have a continues deployment pipeline. The action itself works similar to how you deploy a task definition to Amazon ECS.
+Portainer-stack-deploy is a GitHub Action for deploying a newly updated stack to a Portainer v2 instance. This action is useful when you have a continues deployment pipeline. The action itself works similar to how you deploy a task definition to Amazon ECS.
+
+**Currently works on Portainer API v2.**
 
 ## Action Inputs
 
-| Input Name       | Description                                                                                                                     | Default      |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| portainer-host   | Portainer host, eg. `https://myportainer.instance.com`                                                                          | **Required** |
-| username         | Username for the Portainer login. **NOTE: Do not use admin account!** Create a new CI specific login instead                    | **Required** |
-| password         | Password for the Portainer login                                                                                                | **Required** |
-| stack-name       | Name for the Portainer stack                                                                                                    | **Required** |
-| stack-definition | The path to the docker-compose stack stack definition file from repo root, eg. `stack-definition.yml`                           | **Required** |
-| image            | The URI of the container image to insert into the stack definition, eg.`docker.pkg.github.com/username/repo/master:sha-676cae2` | **Required** |
+| Input            | Description                                                                                                                                                                                      | Default      |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------ |
+| portainer-host   | Portainer host, eg. `https://myportainer.instance.com`                                                                                                                                           | **Required** |
+| username         | Username for the Portainer login. **NOTE: Do not use admin account!** Create a new CI specific login instead                                                                                     | **Required** |
+| password         | Password for the Portainer login                                                                                                                                                                 | **Required** |
+| swarm-id         | ID of the swarm. Only required if you deploy to a swarm                                                                                                                                          |              |
+| stack-name       | Name for the Portainer stack                                                                                                                                                                     | **Required** |
+| stack-definition | The path to the docker-compose stack stack definition file from repo root, eg. `stack-definition.yml`                                                                                            | **Required** |
+| image            | The URI of the container image to insert into the stack definition, eg.`docker.pkg.github.com/username/repo/master:sha-676cae2`. Will use existing image inside stack definition if not provided |              |
 
 ## Examples
 

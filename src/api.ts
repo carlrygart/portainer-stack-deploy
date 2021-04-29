@@ -13,6 +13,7 @@ interface PortainerResources {
   Stacks: {
     all: object
     updateStack: object
+    createStack: object
   }
 }
 
@@ -72,6 +73,11 @@ export default function createPortainerApi({
       Stacks: {
         all: {
           path: '/stacks',
+          middleware: [AccessTokenMiddleware]
+        },
+        createStack: {
+          path: '/stacks',
+          method: 'post',
           middleware: [AccessTokenMiddleware]
         },
         updateStack: {

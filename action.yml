@@ -15,6 +15,9 @@ inputs:
   password:
     required: true
     description: 'Password for the Portainer login'
+  swarm-id:
+    required: false
+    description: 'ID of the swarm. Only required if you deploy to a swarm.'
   stack-name:
     required: true
     description: 'Name for the Portainer stack'
@@ -22,7 +25,7 @@ inputs:
     required: true
     description: 'The path to the docker-compose stack stack definition file, eg. stack-definition.yml'
   image:
-    required: true
+    required: false
     description: 'The URI of the container image to insert into the stack definition, eg. docker.pkg.github.com/username/repo/master'
 
 runs:
