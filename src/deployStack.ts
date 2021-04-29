@@ -38,7 +38,7 @@ function generateNewStackDefinition(
   }
 
   const imageWithoutTag = image.substring(0, image.indexOf(':'))
-  core.info(`Inserts ${image} into the stack definition`)
+  core.info(`Inserting image ${image} into the stack definition`)
   return stackDefinition.replace(
     new RegExp(`${imageWithoutTag}(:.*)?\n`),
     `${image}\n`
@@ -62,7 +62,7 @@ export default async function deployStack({
   )
   core.debug(stackDefinitionToDeploy)
 
-  core.info(`Logging in to Portainer instance`)
+  core.info('Logging in to Portainer instance...')
   await portainerApi.Auth.login({
     body: {
       username,
@@ -75,7 +75,7 @@ export default async function deployStack({
 
   if (existingStack) {
     core.info(`Found existing stack with name: ${stackName}`)
-    core.debug('Updating existing stack...')
+    core.info('Updating existing stack...')
     await portainerApi.Stacks.updateStack({
       id: existingStack.Id,
       endpointId: existingStack.EndpointId,
@@ -85,7 +85,7 @@ export default async function deployStack({
     })
     core.info('Successfully updated existing stack')
   } else {
-    core.debug('Deploying new stack...')
+    core.info('Deploying new stack...')
     await portainerApi.Stacks.createStack({
       type: swarmId ? StackType.SWARM : StackType.COMPOSE,
       method: 'string',
@@ -99,6 +99,6 @@ export default async function deployStack({
     core.info(`Successfully created new stack with name: ${stackName}`)
   }
 
-  core.info(`Logging out from Portainer instance`)
+  core.info(`Logging out from Portainer instance...`)
   await portainerApi.Auth.logout()
 }

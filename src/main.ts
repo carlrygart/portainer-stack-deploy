@@ -20,6 +20,7 @@ export async function run(): Promise<void> {
       stackDefinitionFile,
       image
     })
+    core.info('✅ Deployment done')
   } catch (error) {
     core.setFailed(error.message)
   }
