@@ -18,6 +18,9 @@ inputs:
   swarm-id:
     required: false
     description: 'ID of the swarm. Only required if you deploy to a swarm.'
+  endpoint-id:
+    required: true
+    description: 'ID of the Portainer node to deploy to'
   stack-name:
     required: true
     description: 'Name for the Portainer stack'
