@@ -81,6 +81,7 @@ describe('deployStack', () => {
         username: 'username',
         password: 'password',
         swarmId: 's4ny2nh7qt8lluhvddeu9ulwl',
+        endpointId: '1',
         stackName: 'new-stack-name',
         stackDefinitionFile: 'example-stack-definition.yml',
         image: 'docker.pkg.github.com/username/repo/master:sha-0142c14'
@@ -106,6 +107,7 @@ describe('deployStack', () => {
         username: 'username',
         password: 'password',
         stackName: 'new-stack-name',
+        endpointId: '1',
         stackDefinitionFile: 'example-stack-definition.yml',
         image: 'docker.pkg.github.com/username/repo/master:sha-0142c14'
       })
@@ -131,6 +133,7 @@ describe('deployStack', () => {
       username: 'username',
       password: 'password',
       stackName: 'stack-name',
+      endpointId: '1',
       stackDefinitionFile: 'example-stack-definition.yml',
       image: 'docker.pkg.github.com/username/repo/master:sha-0142c14'
     })

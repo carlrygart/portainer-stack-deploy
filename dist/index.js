@@ -141,7 +141,7 @@ function generateNewStackDefinition(stackDefinitionFile, image) {
     core.info(`Inserting image ${image} into the stack definition`);
     return stackDefinition.replace(new RegExp(`${imageWithoutTag}(:.*)?\n`), `${image}\n`);
 }
-async function deployStack({ portainerHost, username, password, swarmId, stackName, stackDefinitionFile, image }) {
+async function deployStack({ portainerHost, username, password, swarmId, endpointId, stackName, stackDefinitionFile, image }) {
     const portainerApi = api_1.default({ host: `${portainerHost}/api` });
     const stackDefinitionToDeploy = generateNewStackDefinition(stackDefinitionFile, image);
     core.debug(stackDefinitionToDeploy);
@@ -171,7 +171,7 @@ async function deployStack({ portainerHost, username, password, swarmId, stackNa
         await portainerApi.Stacks.createStack({
             type: swarmId ? StackType.SWARM : StackType.COMPOSE,
             method: 'string',
-            endpointId: 1,
+            endpointId: endpointId ? parseInt(endpointId) : 1,
             body: {
                 name: stackName,
                 stackFileContent: stackDefinitionToDeploy,
@@ -232,6 +232,9 @@ async function run() {
         const swarmId = core.getInput('swarm-id', {
             required: false
         });
+        const endpointId = core.getInput('endpoint-id', {
+            required: true
+        });
         const stackName = core.getInput('stack-name', {
             required: true
         });
@@ -246,6 +249,7 @@ async function run() {
             username,
             password,
             swarmId,
+            endpointId,
             stackName,
             stackDefinitionFile,
             image
