@@ -50,6 +50,7 @@ export default async function deployStack({
   username,
   password,
   swarmId,
+  endpointId,
   stackName,
   stackDefinitionFile,
   image
@@ -89,7 +90,7 @@ export default async function deployStack({
     await portainerApi.Stacks.createStack({
       type: swarmId ? StackType.SWARM : StackType.COMPOSE,
       method: 'string',
-      endpointId: 1,
+      endpointId: endpointId,
       body: {
         name: stackName,
         stackFileContent: stackDefinitionToDeploy,

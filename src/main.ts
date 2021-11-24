@@ -15,6 +15,9 @@ export async function run(): Promise<void> {
     const swarmId: string = core.getInput('swarm-id', {
       required: false
     })
+    const swarmId: string = core.getInput('endpoint-id', {
+      required: true
+    })
     const stackName: string = core.getInput('stack-name', {
       required: true
     })
@@ -30,6 +33,7 @@ export async function run(): Promise<void> {
       username,
       password,
       swarmId,
+      endpointId,
       stackName,
       stackDefinitionFile,
       image
