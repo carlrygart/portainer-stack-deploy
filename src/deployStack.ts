@@ -1,6 +1,7 @@
 import createPortainerApi, {StackData} from './api'
 import path from 'path'
 import fs from 'fs'
+import Handlebars from 'handlebars'
 import * as core from '@actions/core'
 
 interface DeployStack {
@@ -11,6 +12,7 @@ interface DeployStack {
   endpointId: string
   stackName: string
   stackDefinitionFile: string
+  variables?: string
   image?: string
 }
 
@@ -21,6 +23,7 @@ enum StackType {
 
 function generateNewStackDefinition(
   stackDefinitionFile: string,
+  variables?: string,
   image?: string
 ): string {
   const stackDefFilePath = path.join(
@@ -28,9 +31,16 @@ function generateNewStackDefinition(
     stackDefinitionFile
   )
   core.info(`Reading stack definition file from ${stackDefFilePath}`)
-  const stackDefinition = fs.readFileSync(stackDefFilePath, 'utf8')
+  let stackDefinition = fs.readFileSync(stackDefFilePath, 'utf8')
   if (!stackDefinition) {
     throw new Error(`Could not find stack-definition file: ${stackDefFilePath}`)
+  }
+
+  if (variables) {
+    core.info(`Applying variables: ${variables}`)
+    const variablesObject = JSON.parse(variables)
+    const template = Handlebars.compile(stackDefinition)
+    stackDefinition = template(variablesObject)
   }
 
   if (!image) {
@@ -54,12 +64,14 @@ export default async function deployStack({
   endpointId,
   stackName,
   stackDefinitionFile,
+  variables,
   image
 }: DeployStack): Promise<void> {
   const portainerApi = createPortainerApi({host: `${portainerHost}/api`})
 
   const stackDefinitionToDeploy = generateNewStackDefinition(
     stackDefinitionFile,
+    variables,
     image
   )
   core.debug(stackDefinitionToDeploy)

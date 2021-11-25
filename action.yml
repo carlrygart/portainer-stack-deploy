@@ -27,6 +27,9 @@ inputs:
   stack-definition:
     required: true
     description: 'The path to the docker-compose stack stack definition file, eg. stack-definition.yml'
+  variables:
+    required: false
+    description: 'If given, these variables will be replaced in docker-compose file by handlebars'
   image:
     required: false
     description: 'The URI of the container image to insert into the stack definition, eg. docker.pkg.github.com/username/repo/master'

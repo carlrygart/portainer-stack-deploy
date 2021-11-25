@@ -24,6 +24,9 @@ export async function run(): Promise<void> {
     const stackDefinitionFile: string = core.getInput('stack-definition', {
       required: true
     })
+    const variables: string = core.getInput('variables', {
+      required: false
+    })
     const image: string = core.getInput('image', {
       required: false
     })
@@ -36,6 +39,7 @@ export async function run(): Promise<void> {
       endpointId,
       stackName,
       stackDefinitionFile,
+      variables,
       image
     })
     core.info('✅ Deployment done')
