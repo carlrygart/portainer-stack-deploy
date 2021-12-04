@@ -1,4 +1,4 @@
-import createPortainerApi, {StackData} from './api'
+import createPortainerApi, { StackData } from './api'
 import path from 'path'
 import fs from 'fs'
 import * as core from '@actions/core'
@@ -54,7 +54,7 @@ export default async function deployStack({
   stackDefinitionFile,
   image
 }: DeployStack): Promise<void> {
-  const portainerApi = createPortainerApi({host: `${portainerHost}/api`})
+  const portainerApi = createPortainerApi({ host: `${portainerHost}/api` })
 
   const stackDefinitionToDeploy = generateNewStackDefinition(
     stackDefinitionFile,

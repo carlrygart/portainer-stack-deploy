@@ -1,4 +1,4 @@
-import forge, {Client, Middleware, setContext} from 'mappersmith'
+import forge, { Client, Middleware, setContext } from 'mappersmith'
 import EncodeJson from 'mappersmith/middleware/encode-json'
 
 interface ClientConfig {
@@ -31,10 +31,10 @@ export interface StackData {
   EndpointId: number
 }
 
-const AccessTokenMiddleware: Middleware = ({context}) => ({
+const AccessTokenMiddleware: Middleware = ({ context }) => ({
   request(request) {
     return request.enhance({
-      headers: {Authorization: `Bearer ${(context as AuthContext).jwtToken}`}
+      headers: { Authorization: `Bearer ${(context as AuthContext).jwtToken}` }
     })
   }
 })
@@ -43,8 +43,8 @@ const SetAccessTokenMiddleware: Middleware = () => ({
   async response(next) {
     // eslint-disable-next-line github/no-then
     return next().then(response => {
-      const {jwt}: AuthData = response.data()
-      setContext({jwtToken: jwt})
+      const { jwt }: AuthData = response.data()
+      setContext({ jwtToken: jwt })
       return response
     })
   }
