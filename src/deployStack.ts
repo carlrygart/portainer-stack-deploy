@@ -1,9 +1,9 @@
-import createPortainerApi, { StackData } from './api'
+import { createPortainerApi, StackData } from './api'
 import path from 'path'
 import fs from 'fs'
 import * as core from '@actions/core'
 
-interface DeployStack {
+type DeployStack = {
   portainerHost: string
   username: string
   password: string
@@ -45,7 +45,7 @@ function generateNewStackDefinition(
   )
 }
 
-export default async function deployStack({
+export async function deployStack({
   portainerHost,
   username,
   password,

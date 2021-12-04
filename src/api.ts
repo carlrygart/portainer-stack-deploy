@@ -1,31 +1,31 @@
-import forge, { Client, Middleware, setContext } from 'mappersmith'
+import forge, { Client, Middleware, Response, setContext } from 'mappersmith'
 import EncodeJson from 'mappersmith/middleware/encode-json'
 
-interface ClientConfig {
+type ClientConfig = {
   host: string
 }
 
-interface PortainerResources {
+type PortainerResources = {
   Auth: {
-    login: object
-    logout: object
+    login: Response
+    logout: Response
   }
   Stacks: {
-    all: object
-    updateStack: object
-    createStack: object
+    all: Response
+    updateStack: Response
+    createStack: Response
   }
 }
 
-interface AuthContext {
+type AuthContext = {
   jwtToken: string
 }
 
-interface AuthData {
+type AuthData = {
   jwt: string
 }
 
-export interface StackData {
+export type StackData = {
   Id: number
   Name: string
   EndpointId: number
@@ -50,7 +50,7 @@ const SetAccessTokenMiddleware: Middleware = () => ({
   }
 })
 
-export default function createPortainerApi({
+export function createPortainerApi({
   host
 }: ClientConfig): Client<PortainerResources> {
   return forge({

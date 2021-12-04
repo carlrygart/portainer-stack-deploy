@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import deployStack from './deployStack'
+import { deployStack } from './deployStack'
 
 export async function run(): Promise<void> {
   try {

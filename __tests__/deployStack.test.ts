@@ -5,9 +5,9 @@ import {
   mockRequest,
   uninstall
 } from 'mappersmith/test'
-import deployStack from '../src/deployStack'
+import { deployStack } from '../src/deployStack'
 
-interface MockRequestCall {
+type MockRequestCall = {
   requestParams: object
 }
 
