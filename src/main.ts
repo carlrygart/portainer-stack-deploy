@@ -36,7 +36,10 @@ export async function run(): Promise<void> {
     })
     core.info('✅ Deployment done')
   } catch (error) {
-    core.setFailed(error as Error)
+    if (error instanceof Error) {
+      core.error(error.message)
+      core.setFailed(error.message)
+    }
   }
 }
 
