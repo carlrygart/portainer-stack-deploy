@@ -1,4 +1,4 @@
-import {install, uninstall, mockRequest, m, MockAssert} from 'mappersmith/test'
+import {MockAssert, install, m, mockRequest, uninstall} from 'mappersmith/test'
 import deployStack from '../src/deployStack'
 
 interface MockRequestCall {
@@ -95,8 +95,7 @@ describe('deployStack', () => {
           Authorization: 'Bearer token',
           'content-type': 'application/json;charset=utf-8'
         },
-        body:
-          '{"name":"new-stack-name","stackFileContent":"version: \\"3.7\\"\\n\\nservices:\\n  server:\\n    image: docker.pkg.github.com/username/repo/master:sha-0142c14\\n    deploy:\\n      update_config:\\n        order: start-first\\n","swarmID":"s4ny2nh7qt8lluhvddeu9ulwl"}'
+        body: '{"name":"new-stack-name","stackFileContent":"version: \\"3.7\\"\\n\\nservices:\\n  server:\\n    image: docker.pkg.github.com/username/repo/master:sha-0142c14\\n    deploy:\\n      update_config:\\n        order: start-first\\n","swarmID":"s4ny2nh7qt8lluhvddeu9ulwl"}'
       })
     })
 
@@ -119,8 +118,7 @@ describe('deployStack', () => {
           Authorization: 'Bearer token',
           'content-type': 'application/json;charset=utf-8'
         },
-        body:
-          '{"name":"new-stack-name","stackFileContent":"version: \\"3.7\\"\\n\\nservices:\\n  server:\\n    image: docker.pkg.github.com/username/repo/master:sha-0142c14\\n    deploy:\\n      update_config:\\n        order: start-first\\n"}'
+        body: '{"name":"new-stack-name","stackFileContent":"version: \\"3.7\\"\\n\\nservices:\\n  server:\\n    image: docker.pkg.github.com/username/repo/master:sha-0142c14\\n    deploy:\\n      update_config:\\n        order: start-first\\n"}'
       })
     })
   })
@@ -143,8 +141,7 @@ describe('deployStack', () => {
         Authorization: 'Bearer token',
         'content-type': 'application/json;charset=utf-8'
       },
-      body:
-        '{"stackFileContent":"version: \\"3.7\\"\\n\\nservices:\\n  server:\\n    image: docker.pkg.github.com/username/repo/master:sha-0142c14\\n    deploy:\\n      update_config:\\n        order: start-first\\n"}'
+      body: '{"stackFileContent":"version: \\"3.7\\"\\n\\nservices:\\n  server:\\n    image: docker.pkg.github.com/username/repo/master:sha-0142c14\\n    deploy:\\n      update_config:\\n        order: start-first\\n"}'
     })
   })
 })
