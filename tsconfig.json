@@ -3,10 +3,10 @@
     "target": "ES2019",
     "module": "commonjs",
     "outDir": "./lib",
-    "rootDir": "./src",
     "strict": true,
     "noImplicitAny": true,
     "esModuleInterop": true
   },
-  "exclude": ["node_modules"]
+  "include": ["src", "__tests__"],
+  "exclude": ["node_modules", "lib", "dist"]
 }
