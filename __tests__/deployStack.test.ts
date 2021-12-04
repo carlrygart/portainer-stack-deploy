@@ -1,10 +1,4 @@
-import {
-  MockAssert,
-  install,
-  m,
-  mockRequest,
-  uninstall
-} from 'mappersmith/test'
+import { MockAssert, install, m, mockRequest, uninstall } from 'mappersmith/test'
 import { deployStack } from '../src/deployStack'
 
 type MockRequestCall = {

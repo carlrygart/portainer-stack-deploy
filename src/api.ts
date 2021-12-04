@@ -31,6 +31,17 @@ export type StackData = {
   EndpointId: number
 }
 
+export type MappersmithErrorObject = {
+  responseStatus?: number
+  responseData?: string
+  originalRequest?: {
+    methodDescriptor?: {
+      path?: string
+      method?: string
+    }
+  }
+}
+
 const AccessTokenMiddleware: Middleware = ({ context }) => ({
   request(request) {
     return request.enhance({
@@ -41,7 +52,6 @@ const AccessTokenMiddleware: Middleware = ({ context }) => ({
 
 const SetAccessTokenMiddleware: Middleware = () => ({
   async response(next) {
-    // eslint-disable-next-line github/no-then
     return next().then(response => {
       const { jwt }: AuthData = response.data()
       setContext({ jwtToken: jwt })
@@ -50,9 +60,7 @@ const SetAccessTokenMiddleware: Middleware = () => ({
   }
 })
 
-export function createPortainerApi({
-  host
-}: ClientConfig): Client<PortainerResources> {
+export function createPortainerApi({ host }: ClientConfig): Client<PortainerResources> {
   return forge({
     clientId: 'portainerClient',
     host,

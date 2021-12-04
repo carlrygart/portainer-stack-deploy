@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import { MappersmithErrorObject } from './api'
 import { deployStack } from './deployStack'
 
 export async function run(): Promise<void> {
@@ -37,9 +38,23 @@ export async function run(): Promise<void> {
     core.info('✅ Deployment done')
   } catch (error) {
     if (error instanceof Error) {
-      core.error(error.message)
-      core.setFailed(error.message)
+      return core.setFailed(error.message)
     }
+
+    const mappersmithError = error as MappersmithErrorObject
+    if (
+      typeof mappersmithError === 'object' &&
+      mappersmithError.responseStatus &&
+      mappersmithError.responseData &&
+      mappersmithError.originalRequest?.methodDescriptor?.path &&
+      mappersmithError.originalRequest?.methodDescriptor?.method
+    ) {
+      return core.setFailed(
+        `HTTP Status ${mappersmithError.responseStatus} (${mappersmithError.originalRequest.methodDescriptor.method} ${mappersmithError.originalRequest.methodDescriptor.path}): ${mappersmithError.responseData}`
+      )
+    }
+
+    return core.setFailed(error as Error)
   }
 }
 
