@@ -29,6 +29,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createPortainerApi = void 0;
 const mappersmith_1 = __importStar(__nccwpck_require__(250));
 const encode_json_1 = __importDefault(__nccwpck_require__(272));
 const AccessTokenMiddleware = ({ context }) => ({
@@ -40,7 +41,6 @@ const AccessTokenMiddleware = ({ context }) => ({
 });
 const SetAccessTokenMiddleware = () => ({
     async response(next) {
-        // eslint-disable-next-line github/no-then
         return next().then(response => {
             const { jwt } = response.data();
             (0, mappersmith_1.setContext)({ jwtToken: jwt });
@@ -85,7 +85,7 @@ function createPortainerApi({ host }) {
         }
     });
 }
-exports["default"] = createPortainerApi;
+exports.createPortainerApi = createPortainerApi;
 
 
 /***/ }),
@@ -118,7 +118,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const api_1 = __importDefault(__nccwpck_require__(947));
+exports.deployStack = void 0;
+const api_1 = __nccwpck_require__(947);
 const path_1 = __importDefault(__nccwpck_require__(17));
 const fs_1 = __importDefault(__nccwpck_require__(147));
 const core = __importStar(__nccwpck_require__(186));
@@ -143,7 +144,7 @@ function generateNewStackDefinition(stackDefinitionFile, image) {
     return stackDefinition.replace(new RegExp(`${imageWithoutTag}(:.*)?\n`), `${image}\n`);
 }
 async function deployStack({ portainerHost, username, password, swarmId, stackName, stackDefinitionFile, image }) {
-    const portainerApi = (0, api_1.default)({ host: `${portainerHost}/api` });
+    const portainerApi = (0, api_1.createPortainerApi)({ host: `${portainerHost}/api` });
     const stackDefinitionToDeploy = generateNewStackDefinition(stackDefinitionFile, image);
     core.debug(stackDefinitionToDeploy);
     core.info('Logging in to Portainer instance...');
@@ -153,38 +154,46 @@ async function deployStack({ portainerHost, username, password, swarmId, stackNa
             password
         }
     });
-    const allStacks = (await portainerApi.Stacks.all()).data();
-    const existingStack = allStacks.find((s) => s.Name === stackName);
-    if (existingStack) {
-        core.info(`Found existing stack with name: ${stackName}`);
-        core.info('Updating existing stack...');
-        await portainerApi.Stacks.updateStack({
-            id: existingStack.Id,
-            endpointId: existingStack.EndpointId,
-            body: {
-                stackFileContent: stackDefinitionToDeploy
-            }
-        });
-        core.info('Successfully updated existing stack');
+    try {
+        const allStacks = (await portainerApi.Stacks.all()).data();
+        const existingStack = allStacks.find((s) => s.Name === stackName);
+        if (existingStack) {
+            core.info(`Found existing stack with name: ${stackName}`);
+            core.info('Updating existing stack...');
+            await portainerApi.Stacks.updateStack({
+                id: existingStack.Id,
+                endpointId: existingStack.EndpointId,
+                body: {
+                    stackFileContent: stackDefinitionToDeploy
+                }
+            });
+            core.info('Successfully updated existing stack');
+        }
+        else {
+            core.info('Deploying new stack...');
+            await portainerApi.Stacks.createStack({
+                type: swarmId ? StackType.SWARM : StackType.COMPOSE,
+                method: 'string',
+                endpointId: 1,
+                body: {
+                    name: stackName,
+                    stackFileContent: stackDefinitionToDeploy,
+                    swarmID: swarmId ? swarmId : undefined
+                }
+            });
+            core.info(`Successfully created new stack with name: ${stackName}`);
+        }
     }
-    else {
-        core.info('Deploying new stack...');
-        await portainerApi.Stacks.createStack({
-            type: swarmId ? StackType.SWARM : StackType.COMPOSE,
-            method: 'string',
-            endpointId: 1,
-            body: {
-                name: stackName,
-                stackFileContent: stackDefinitionToDeploy,
-                swarmID: swarmId ? swarmId : undefined
-            }
-        });
-        core.info(`Successfully created new stack with name: ${stackName}`);
+    catch (error) {
+        core.info('⛔️ Something went wrong during deployment!');
+        throw error;
     }
-    core.info(`Logging out from Portainer instance...`);
-    await portainerApi.Auth.logout();
+    finally {
+        core.info(`Logging out from Portainer instance...`);
+        await portainerApi.Auth.logout();
+    }
 }
-exports["default"] = deployStack;
+exports.deployStack = deployStack;
 
 
 /***/ }),
@@ -213,14 +222,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(186));
-const deployStack_1 = __importDefault(__nccwpck_require__(90));
+const deployStack_1 = __nccwpck_require__(90);
 async function run() {
+    var _a, _b, _c, _d;
     try {
         const portainerHost = core.getInput('portainer-host', {
             required: true
@@ -243,7 +250,7 @@ async function run() {
         const image = core.getInput('image', {
             required: false
         });
-        await (0, deployStack_1.default)({
+        await (0, deployStack_1.deployStack)({
             portainerHost,
             username,
             password,
@@ -255,7 +262,18 @@ async function run() {
         core.info('✅ Deployment done');
     }
     catch (error) {
-        core.setFailed(error);
+        if (error instanceof Error) {
+            return core.setFailed(error.message);
+        }
+        const mappersmithError = error;
+        if (typeof mappersmithError === 'object' &&
+            mappersmithError.responseStatus &&
+            mappersmithError.responseData &&
+            ((_b = (_a = mappersmithError.originalRequest) === null || _a === void 0 ? void 0 : _a.methodDescriptor) === null || _b === void 0 ? void 0 : _b.path) &&
+            ((_d = (_c = mappersmithError.originalRequest) === null || _c === void 0 ? void 0 : _c.methodDescriptor) === null || _d === void 0 ? void 0 : _d.method)) {
+            return core.setFailed(`HTTP Status ${mappersmithError.responseStatus} (${mappersmithError.originalRequest.methodDescriptor.method} ${mappersmithError.originalRequest.methodDescriptor.path}): ${mappersmithError.responseData}`);
+        }
+        return core.setFailed(error);
     }
 }
 exports.run = run;

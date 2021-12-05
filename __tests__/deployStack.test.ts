@@ -1,7 +1,7 @@
-import {MockAssert, install, m, mockRequest, uninstall} from 'mappersmith/test'
-import deployStack from '../src/deployStack'
+import { MockAssert, install, m, mockRequest, uninstall } from 'mappersmith/test'
+import { deployStack } from '../src/deployStack'
 
-interface MockRequestCall {
+type MockRequestCall = {
   requestParams: object
 }
 
@@ -20,10 +20,10 @@ describe('deployStack', () => {
     mockRequest({
       method: 'post',
       url: 'http://mock.url/api/auth',
-      body: JSON.stringify({username: 'username', password: 'password'}),
+      body: JSON.stringify({ username: 'username', password: 'password' }),
       response: {
         status: 200,
-        body: {jwt: 'token'}
+        body: { jwt: 'token' }
       }
     })
 
@@ -32,7 +32,7 @@ describe('deployStack', () => {
       url: 'http://mock.url/api/stacks',
       response: {
         status: 200,
-        body: [{Id: 2, Name: 'stack-name', EndpointId: 1}]
+        body: [{ Id: 2, Name: 'stack-name', EndpointId: 1 }]
       }
     })
 
