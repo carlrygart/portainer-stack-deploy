@@ -1,8 +1,8 @@
-version: "3.7"
+version: '3.7'
 
 services:
   server:
-    image: docker.pkg.github.com/username/repo/master:latest
+    image: ghcr.io/username/repo:latest
     deploy:
       update_config:
         order: start-first
