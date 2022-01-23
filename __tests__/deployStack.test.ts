@@ -13,6 +13,7 @@ describe('deployStack', () => {
   let updateStackMock: MockAssert
   let createSwarmStackMock: MockAssert
   let createComposeStackMock: MockAssert
+  let createComposeEndpoint2StackMock: MockAssert
 
   beforeEach(() => {
     install()
@@ -63,6 +64,15 @@ describe('deployStack', () => {
       }
     })
 
+    createComposeEndpoint2StackMock = mockRequest({
+      method: 'post',
+      url: 'http://mock.url/api/stacks?type=2&method=string&endpointId=2',
+      body: m.anything(),
+      response: {
+        status: 200
+      }
+    })
+
     mockRequest({
       method: 'post',
       url: 'http://mock.url/api/auth/logout',
@@ -81,7 +91,6 @@ describe('deployStack', () => {
         username: 'username',
         password: 'password',
         swarmId: 's4ny2nh7qt8lluhvddeu9ulwl',
-        endpointId: '1',
         stackName: 'new-stack-name',
         stackDefinitionFile: 'example-stack-definition.yml',
         image: 'docker.pkg.github.com/username/repo/master:sha-0142c14'
@@ -107,7 +116,6 @@ describe('deployStack', () => {
         username: 'username',
         password: 'password',
         stackName: 'new-stack-name',
-        endpointId: '1',
         stackDefinitionFile: 'example-stack-definition.yml',
         image: 'docker.pkg.github.com/username/repo/master:sha-0142c14'
       })
@@ -133,7 +141,6 @@ describe('deployStack', () => {
       username: 'username',
       password: 'password',
       stackName: 'stack-name',
-      endpointId: '1',
       stackDefinitionFile: 'example-stack-definition.yml',
       image: 'docker.pkg.github.com/username/repo/master:sha-0142c14'
     })
@@ -148,6 +155,31 @@ describe('deployStack', () => {
       },
       body:
         '{"stackFileContent":"version: \\"3.7\\"\\n\\nservices:\\n  server:\\n    image: docker.pkg.github.com/username/repo/master:sha-0142c14\\n    deploy:\\n      update_config:\\n        order: start-first\\n"}'
+    })
+  })
+
+  test('explicit endpoint id', async () => {
+    await deployStack({
+      portainerHost: 'http://mock.url',
+      username: 'username',
+      password: 'password',
+      endpointId: 2,
+      stackName: 'new-stack-name',
+      stackDefinitionFile: 'example-stack-definition.yml',
+      image: 'docker.pkg.github.com/username/repo/master:sha-0142c14'
+    })
+    expect(createComposeEndpoint2StackMock.callsCount()).toBe(1)
+    const createStackCall = createComposeEndpoint2StackMock.mostRecentCall() as unknown
+    expect((createStackCall as MockRequestCall).requestParams).toEqual({
+      type: 2,
+      method: 'string',
+      endpointId: 2,
+      headers: {
+        Authorization: 'Bearer token',
+        'content-type': 'application/json;charset=utf-8'
+      },
+      body:
+        '{"name":"new-stack-name","stackFileContent":"version: \\"3.7\\"\\n\\nservices:\\n  server:\\n    image: docker.pkg.github.com/username/repo/master:sha-0142c14\\n    deploy:\\n      update_config:\\n        order: start-first\\n"}'
     })
   })
 })
