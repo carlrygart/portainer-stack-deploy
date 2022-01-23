@@ -15,18 +15,18 @@ export async function run(): Promise<void> {
     const swarmId: string = core.getInput('swarm-id', {
       required: false
     })
-    const endpointId: string = core.getInput('endpoint-id', {
-      required: true
-    })
+    const endpointId: number = parseInt(core.getInput('endpoint-id', {
+      required: false
+    }))
     const stackName: string = core.getInput('stack-name', {
       required: true
     })
     const stackDefinitionFile: string = core.getInput('stack-definition', {
       required: true
     })
-    const variables: string = core.getInput('variables', {
+    const templateVariables: object = JSON.parse(core.getInput('template-variables', {
       required: false
-    })
+    }))
     const image: string = core.getInput('image', {
       required: false
     })
@@ -39,7 +39,7 @@ export async function run(): Promise<void> {
       endpointId,
       stackName,
       stackDefinitionFile,
-      variables,
+      templateVariables,
       image
     })
     core.info('✅ Deployment done')

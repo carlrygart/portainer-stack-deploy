@@ -19,7 +19,7 @@ inputs:
     required: false
     description: 'ID of the swarm. Only required if you deploy to a swarm.'
   endpoint-id:
-    required: true
+    required: false
     description: 'ID of the Portainer node to deploy to'
   stack-name:
     required: true
@@ -27,7 +27,7 @@ inputs:
   stack-definition:
     required: true
     description: 'The path to the docker-compose stack stack definition file, eg. stack-definition.yml'
-  variables:
+  template-variables:
     required: false
     description: 'If given, these variables will be replaced in docker-compose file by handlebars'
   image:

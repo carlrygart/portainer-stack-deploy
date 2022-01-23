@@ -9,10 +9,10 @@ interface DeployStack {
   username: string
   password: string
   swarmId?: string
-  endpointId: string
+  endpointId?: number
   stackName: string
   stackDefinitionFile: string
-  variables?: string
+  templateVariables?: object
   image?: string
 }
 
@@ -23,7 +23,7 @@ enum StackType {
 
 function generateNewStackDefinition(
   stackDefinitionFile: string,
-  variables?: string,
+  templateVariables?: object,
   image?: string
 ): string {
   const stackDefFilePath = path.join(
@@ -36,15 +36,13 @@ function generateNewStackDefinition(
     throw new Error(`Could not find stack-definition file: ${stackDefFilePath}`)
   }
 
-  if (variables) {
-    core.info(`Applying variables: ${variables}`)
-    const variablesObject = JSON.parse(variables)
-    const template = Handlebars.compile(stackDefinition)
-    stackDefinition = template(variablesObject)
+  if (templateVariables) {
+    core.info(`Applying variables: ${templateVariables}`)
+    stackDefinition = Handlebars.compile(stackDefinition)(templateVariables)
   }
 
   if (!image) {
-    core.info(`No new image provided, using existing stack definition`)
+    core.info(`No new image provided. Will use image in stack definition.`)
     return stackDefinition
   }
 
@@ -64,14 +62,14 @@ export default async function deployStack({
   endpointId,
   stackName,
   stackDefinitionFile,
-  variables,
+  templateVariables,
   image
 }: DeployStack): Promise<void> {
   const portainerApi = createPortainerApi({host: `${portainerHost}/api`})
 
   const stackDefinitionToDeploy = generateNewStackDefinition(
     stackDefinitionFile,
-    variables,
+    templateVariables,
     image
   )
   core.debug(stackDefinitionToDeploy)
@@ -103,7 +101,7 @@ export default async function deployStack({
     await portainerApi.Stacks.createStack({
       type: swarmId ? StackType.SWARM : StackType.COMPOSE,
       method: 'string',
-      endpointId: endpointId ? parseInt(endpointId) : 1,
+      endpointId: typeof endpointId !== 'undefined' && !isNaN(endpointId) ? endpointId : 1,
       body: {
         name: stackName,
         stackFileContent: stackDefinitionToDeploy,
