@@ -137,7 +137,7 @@ function generateNewStackDefinition(stackDefinitionFile, templateVariables, imag
         throw new Error(`Could not find stack-definition file: ${stackDefFilePath}`);
     }
     if (templateVariables) {
-        core.info(`Applying variables: ${templateVariables}`);
+        core.info(`Applying template variables: ${templateVariables}`);
         stackDefinition = handlebars_1.default.compile(stackDefinition)(templateVariables);
     }
     if (!image) {
@@ -246,18 +246,18 @@ async function run() {
         const swarmId = core.getInput('swarm-id', {
             required: false
         });
-        const endpointId = parseInt(core.getInput('endpoint-id', {
+        const endpointId = core.getInput('endpoint-id', {
             required: false
-        })) || 1;
+        });
         const stackName = core.getInput('stack-name', {
             required: true
         });
         const stackDefinitionFile = core.getInput('stack-definition', {
             required: true
         });
-        const templateVariables = JSON.parse(core.getInput('template-variables', {
+        const templateVariables = core.getInput('template-variables', {
             required: false
-        }));
+        });
         const image = core.getInput('image', {
             required: false
         });
@@ -266,10 +266,10 @@ async function run() {
             username,
             password,
             swarmId,
-            endpointId,
+            endpointId: parseInt(endpointId) || 1,
             stackName,
             stackDefinitionFile,
-            templateVariables,
+            templateVariables: templateVariables ? JSON.parse(templateVariables) : undefined,
             image
         });
         core.info('✅ Deployment done');
