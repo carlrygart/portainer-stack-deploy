@@ -1,58 +1,66 @@
-import forge, {Client, Middleware, setContext} from 'mappersmith'
+import forge, { Client, Middleware, Response, setContext } from 'mappersmith'
 import EncodeJson from 'mappersmith/middleware/encode-json'
 
-interface ClientConfig {
+type ClientConfig = {
   host: string
 }
 
-interface PortainerResources {
+type PortainerResources = {
   Auth: {
-    login: object
-    logout: object
+    login: Response
+    logout: Response
   }
   Stacks: {
-    all: object
-    updateStack: object
-    createStack: object
+    all: Response
+    updateStack: Response
+    createStack: Response
   }
 }
 
-interface AuthContext {
+type AuthContext = {
   jwtToken: string
 }
 
-interface AuthData {
+type AuthData = {
   jwt: string
 }
 
-export interface StackData {
+export type StackData = {
   Id: number
   Name: string
   EndpointId: number
 }
 
-const AccessTokenMiddleware: Middleware = ({context}) => ({
+export type MappersmithErrorObject = {
+  responseStatus?: number
+  responseData?: string
+  originalRequest?: {
+    methodDescriptor?: {
+      path?: string
+      method?: string
+    }
+  }
+}
+
+const AccessTokenMiddleware: Middleware = ({ context }) => ({
   request(request) {
     return request.enhance({
-      headers: {Authorization: `Bearer ${(context as AuthContext).jwtToken}`}
+      headers: { Authorization: `Bearer ${(context as AuthContext).jwtToken}` }
     })
   }
 })
 
 const SetAccessTokenMiddleware: Middleware = () => ({
   async response(next) {
-    // eslint-disable-next-line github/no-then
     return next().then(response => {
-      const {jwt}: AuthData = response.data()
-      setContext({jwtToken: jwt})
+      const { jwt }: AuthData = response.data()
+      setContext({ jwtToken: jwt })
       return response
     })
   }
 })
 
-export default function createPortainerApi({
-  host
-}: ClientConfig): Client<PortainerResources> {
+export function createPortainerApi({ host }: ClientConfig): Client<PortainerResources> {
   return forge({
     clientId: 'portainerClient',
     host,

@@ -1,7 +1,7 @@
-import {install, uninstall, mockRequest, m, MockAssert} from 'mappersmith/test'
-import deployStack from '../src/deployStack'
+import { MockAssert, install, m, mockRequest, uninstall } from 'mappersmith/test'
+import { deployStack } from '../src/deployStack'
 
-interface MockRequestCall {
+type MockRequestCall = {
   requestParams: object
 }
 
@@ -21,10 +21,10 @@ describe('deployStack', () => {
     mockRequest({
       method: 'post',
       url: 'http://mock.url/api/auth',
-      body: JSON.stringify({username: 'username', password: 'password'}),
+      body: JSON.stringify({ username: 'username', password: 'password' }),
       response: {
         status: 200,
-        body: {jwt: 'token'}
+        body: { jwt: 'token' }
       }
     })
 
@@ -33,7 +33,7 @@ describe('deployStack', () => {
       url: 'http://mock.url/api/stacks',
       response: {
         status: 200,
-        body: [{Id: 2, Name: 'stack-name', EndpointId: 1}]
+        body: [{ Id: 2, Name: 'stack-name', EndpointId: 1 }]
       }
     })
 
@@ -93,7 +93,7 @@ describe('deployStack', () => {
         swarmId: 's4ny2nh7qt8lluhvddeu9ulwl',
         stackName: 'new-stack-name',
         stackDefinitionFile: 'example-stack-definition.yml',
-        image: 'docker.pkg.github.com/username/repo/master:sha-0142c14'
+        image: 'ghcr.io/username/repo:sha-0142c14'
       })
       expect(createSwarmStackMock.callsCount()).toBe(1)
       const createStackCall = createSwarmStackMock.mostRecentCall() as unknown
@@ -105,8 +105,7 @@ describe('deployStack', () => {
           Authorization: 'Bearer token',
           'content-type': 'application/json;charset=utf-8'
         },
-        body:
-          '{"name":"new-stack-name","stackFileContent":"version: \\"3.7\\"\\n\\nservices:\\n  server:\\n    image: docker.pkg.github.com/username/repo/master:sha-0142c14\\n    deploy:\\n      update_config:\\n        order: start-first\\n","swarmID":"s4ny2nh7qt8lluhvddeu9ulwl"}'
+        body: '{"name":"new-stack-name","stackFileContent":"version: \'3.7\'\\n\\nservices:\\n  server:\\n    image: ghcr.io/username/repo:sha-0142c14\\n    deploy:\\n      update_config:\\n        order: start-first\\n","swarmID":"s4ny2nh7qt8lluhvddeu9ulwl"}'
       })
     })
 
@@ -117,7 +116,7 @@ describe('deployStack', () => {
         password: 'password',
         stackName: 'new-stack-name',
         stackDefinitionFile: 'example-stack-definition.yml',
-        image: 'docker.pkg.github.com/username/repo/master:sha-0142c14'
+        image: 'ghcr.io/username/repo:sha-0142c14'
       })
       expect(createComposeStackMock.callsCount()).toBe(1)
       const createStackCall = createComposeStackMock.mostRecentCall() as unknown
@@ -129,8 +128,7 @@ describe('deployStack', () => {
           Authorization: 'Bearer token',
           'content-type': 'application/json;charset=utf-8'
         },
-        body:
-          '{"name":"new-stack-name","stackFileContent":"version: \\"3.7\\"\\n\\nservices:\\n  server:\\n    image: docker.pkg.github.com/username/repo/master:sha-0142c14\\n    deploy:\\n      update_config:\\n        order: start-first\\n"}'
+        body: '{"name":"new-stack-name","stackFileContent":"version: \'3.7\'\\n\\nservices:\\n  server:\\n    image: ghcr.io/username/repo:sha-0142c14\\n    deploy:\\n      update_config:\\n        order: start-first\\n"}'
       })
     })
   })
@@ -142,7 +140,7 @@ describe('deployStack', () => {
       password: 'password',
       stackName: 'stack-name',
       stackDefinitionFile: 'example-stack-definition.yml',
-      image: 'docker.pkg.github.com/username/repo/master:sha-0142c14'
+      image: 'ghcr.io/username/repo:sha-0142c14'
     })
     expect(updateStackMock.callsCount()).toBe(1)
     const updateStackCall = updateStackMock.mostRecentCall() as unknown
@@ -153,8 +151,7 @@ describe('deployStack', () => {
         Authorization: 'Bearer token',
         'content-type': 'application/json;charset=utf-8'
       },
-      body:
-        '{"stackFileContent":"version: \\"3.7\\"\\n\\nservices:\\n  server:\\n    image: docker.pkg.github.com/username/repo/master:sha-0142c14\\n    deploy:\\n      update_config:\\n        order: start-first\\n"}'
+      body: '{"stackFileContent":"version: \'3.7\'\\n\\nservices:\\n  server:\\n    image: ghcr.io/username/repo:sha-0142c14\\n    deploy:\\n      update_config:\\n        order: start-first\\n"}'
     })
   })
 
