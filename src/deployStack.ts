@@ -34,7 +34,7 @@ function generateNewStackDefinition(
   }
 
   if (templateVariables) {
-    core.info(`Applying variables: ${templateVariables}`)
+    core.info(`Applying template variables: ${templateVariables}`)
     stackDefinition = Handlebars.compile(stackDefinition)(templateVariables)
   }
 
