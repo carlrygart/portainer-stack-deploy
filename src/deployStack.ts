@@ -1,6 +1,7 @@
 import { createPortainerApi, StackData } from './api'
 import path from 'path'
 import fs from 'fs'
+import Handlebars from 'handlebars'
 import * as core from '@actions/core'
 
 type DeployStack = {
@@ -8,8 +9,10 @@ type DeployStack = {
   username: string
   password: string
   swarmId?: string
+  endpointId: number
   stackName: string
   stackDefinitionFile: string
+  templateVariables?: object
   image?: string
 }
 
@@ -18,16 +21,25 @@ enum StackType {
   COMPOSE = 2
 }
 
-function generateNewStackDefinition(stackDefinitionFile: string, image?: string): string {
+function generateNewStackDefinition(
+  stackDefinitionFile: string,
+  templateVariables?: object,
+  image?: string
+): string {
   const stackDefFilePath = path.join(process.env.GITHUB_WORKSPACE as string, stackDefinitionFile)
   core.info(`Reading stack definition file from ${stackDefFilePath}`)
-  const stackDefinition = fs.readFileSync(stackDefFilePath, 'utf8')
+  let stackDefinition = fs.readFileSync(stackDefFilePath, 'utf8')
   if (!stackDefinition) {
     throw new Error(`Could not find stack-definition file: ${stackDefFilePath}`)
   }
 
+  if (templateVariables) {
+    core.info(`Applying template variables: ${templateVariables}`)
+    stackDefinition = Handlebars.compile(stackDefinition)(templateVariables)
+  }
+
   if (!image) {
-    core.info(`No new image provided, using existing stack definition`)
+    core.info(`No new image provided. Will use image in stack definition.`)
     return stackDefinition
   }
 
@@ -41,13 +53,19 @@ export async function deployStack({
   username,
   password,
   swarmId,
+  endpointId,
   stackName,
   stackDefinitionFile,
+  templateVariables,
   image
 }: DeployStack): Promise<void> {
   const portainerApi = createPortainerApi({ host: `${portainerHost}/api` })
 
-  const stackDefinitionToDeploy = generateNewStackDefinition(stackDefinitionFile, image)
+  const stackDefinitionToDeploy = generateNewStackDefinition(
+    stackDefinitionFile,
+    templateVariables,
+    image
+  )
   core.debug(stackDefinitionToDeploy)
 
   core.info('Logging in to Portainer instance...')
@@ -78,7 +96,7 @@ export async function deployStack({
       await portainerApi.Stacks.createStack({
         type: swarmId ? StackType.SWARM : StackType.COMPOSE,
         method: 'string',
-        endpointId: 1,
+        endpointId,
         body: {
           name: stackName,
           stackFileContent: stackDefinitionToDeploy,
