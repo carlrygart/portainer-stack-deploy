@@ -137,7 +137,7 @@ function generateNewStackDefinition(stackDefinitionFile, templateVariables, imag
         throw new Error(`Could not find stack-definition file: ${stackDefFilePath}`);
     }
     if (templateVariables) {
-        core.info(`Applying template variables: ${templateVariables}`);
+        core.info(`Applying template variables for keys: ${Object.keys(templateVariables)}`);
         stackDefinition = handlebars_1.default.compile(stackDefinition)(templateVariables);
     }
     if (!image) {
