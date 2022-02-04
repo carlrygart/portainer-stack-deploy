@@ -10,15 +10,17 @@ Portainer-stack-deploy is a GitHub Action for deploying a newly updated stack to
 
 ## Action Inputs
 
-| Input            | Description                                                                                                                                                                  | Default      |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| portainer-host   | Portainer host, eg. `https://myportainer.instance.com`                                                                                                                       | **Required** |
-| username         | Username for the Portainer login. **NOTE: Do not use admin account!** Create a new CI specific login instead                                                                 | **Required** |
-| password         | Password for the Portainer login                                                                                                                                             | **Required** |
-| swarm-id         | ID of the swarm. Only required if you deploy to a swarm                                                                                                                      |              |
-| stack-name       | Name for the Portainer stack                                                                                                                                                 | **Required** |
-| stack-definition | The path to the docker-compose stack stack definition file from repo root, eg. `stack-definition.yml`                                                                        | **Required** |
-| image            | The URI of the container image to insert into the stack definition, eg. `ghcr.io/username/repo:sha-676cae2`. Will use existing image inside stack definition if not provided |              |
+| Input              | Description                                                                                                                                                                  | Default      |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| portainer-host     | Portainer host, eg. `https://myportainer.instance.com`                                                                                                                       | **Required** |
+| username           | Username for the Portainer login. **NOTE: Do not use admin account!** Create a new CI specific login instead                                                                 | **Required** |
+| password           | Password for the Portainer login                                                                                                                                             | **Required** |
+| swarm-id           | ID of the swarm. Only required if you deploy to a swarm                                                                                                                      |              |
+| endpoint-id        | ID of the Portainer node to deploy to                                                                                                                                        | 1            |
+| stack-name         | Name for the Portainer stack                                                                                                                                                 | **Required** |
+| stack-definition   | The path to the docker-compose stack stack definition file from repo root, eg. `stack-definition.yml`                                                                        | **Required** |
+| template-variables | If given, these variables will be replaced in docker-compose file by handlebars                                                                                              |              |
+| image              | The URI of the container image to insert into the stack definition, eg. `ghcr.io/username/repo:sha-676cae2`. Will use existing image inside stack definition if not provided |              |
 
 ## Example
 
