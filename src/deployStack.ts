@@ -9,7 +9,7 @@ type DeployStack = {
   username: string
   password: string
   swarmId?: string
-  endpointId?: number
+  endpointId: number
   stackName: string
   stackDefinitionFile: string
   templateVariables?: object
@@ -96,7 +96,7 @@ export async function deployStack({
       await portainerApi.Stacks.createStack({
         type: swarmId ? StackType.SWARM : StackType.COMPOSE,
         method: 'string',
-        endpointId: typeof endpointId !== 'undefined' && !isNaN(endpointId) ? endpointId : 1,
+        endpointId,
         body: {
           name: stackName,
           stackFileContent: stackDefinitionToDeploy,
