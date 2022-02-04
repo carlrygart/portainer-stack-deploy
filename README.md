@@ -79,6 +79,7 @@ jobs:
           password: ${{ secrets.PORTAINER_PASSWORD }}
           stack-name: 'my-awesome-web-app'
           stack-definition: 'stack-definition.yml'
+          template-variables: '{"username": "MrCool"}'
           image: ${{ env.DOCKER_IMAGE_URI }}:${{ env.IMAGE_TAG }}
 ```
 
@@ -89,7 +90,7 @@ version: '3.7'
 
 services:
   server:
-    image: ghcr.io/github-username/my-awesome-web-app:latest
+    image: ghcr.io/{{username}}/my-awesome-web-app:latest
     deploy:
       update_config:
         order: start-first
