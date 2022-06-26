@@ -87,6 +87,7 @@ export async function deployStack({
         id: existingStack.Id,
         endpointId: existingStack.EndpointId,
         body: {
+          env: existingStack.Env,
           stackFileContent: stackDefinitionToDeploy
         }
       })

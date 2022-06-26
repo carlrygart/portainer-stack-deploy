@@ -28,7 +28,8 @@ type AuthData = {
 export type StackData = {
   Id: number
   Name: string
-  EndpointId: number
+  EndpointId: number,
+  Env: Map<string, string>[]
 }
 
 export type MappersmithErrorObject = {

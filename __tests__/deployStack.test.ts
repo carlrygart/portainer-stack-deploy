@@ -11,6 +11,7 @@ process.env.GITHUB_WORKSPACE = './'
 
 describe('deployStack', () => {
   let updateStackMock: MockAssert
+  let updateStackMockWithEnv: MockAssert
   let createSwarmStackMock: MockAssert
   let createComposeStackMock: MockAssert
   let createComposeEndpoint2StackMock: MockAssert
@@ -33,13 +34,22 @@ describe('deployStack', () => {
       url: 'http://mock.url/api/stacks',
       response: {
         status: 200,
-        body: [{ Id: 2, Name: 'stack-name', EndpointId: 1 }]
+        body: [{ Id: 2, Name: 'stack-name', EndpointId: 1 }, { Id: 3, Name: 'stack-name-with-env', EndpointId: 1, Env: [{key1: "value1"}] }]
       }
     })
 
     updateStackMock = mockRequest({
       method: 'put',
       url: 'http://mock.url/api/stacks/2?endpointId=1',
+      body: m.anything(),
+      response: {
+        status: 200
+      }
+    })
+
+    updateStackMockWithEnv = mockRequest({
+      method: 'put',
+      url: 'http://mock.url/api/stacks/3?endpointId=1',
       body: m.anything(),
       response: {
         status: 200
@@ -153,6 +163,29 @@ describe('deployStack', () => {
         'content-type': 'application/json;charset=utf-8'
       },
       body: '{"stackFileContent":"version: \'3.7\'\\n\\nservices:\\n  server:\\n    image: ghcr.io/username/repo:sha-0142c14\\n    deploy:\\n      update_config:\\n        order: start-first\\n"}'
+    })
+  })
+
+  test('deploy existing stack with env', async () => {
+    await deployStack({
+      portainerHost: 'http://mock.url',
+      username: 'username',
+      password: 'password',
+      endpointId: 1,
+      stackName: 'stack-name-with-env',
+      stackDefinitionFile: 'example-stack-definition.yml',
+      image: 'ghcr.io/username/repo:sha-0142c14'
+    })
+    expect(updateStackMockWithEnv.callsCount()).toBe(1)
+    const updateStackCall = updateStackMockWithEnv.mostRecentCall() as unknown
+    expect((updateStackCall as MockRequestCall).requestParams).toEqual({
+      id: 3,
+      endpointId: 1,
+      headers: {
+        Authorization: 'Bearer token',
+        'content-type': 'application/json;charset=utf-8'
+      },
+      body: '{"env":[{"key1":"value1"}],"stackFileContent":"version: \'3.7\'\\n\\nservices:\\n  server:\\n    image: ghcr.io/username/repo:sha-0142c14\\n    deploy:\\n      update_config:\\n        order: start-first\\n"}'
     })
   })
 
