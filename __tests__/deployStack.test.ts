@@ -34,7 +34,15 @@ describe('deployStack', () => {
       url: 'http://mock.url/api/stacks',
       response: {
         status: 200,
-        body: [{ Id: 2, Name: 'stack-name', EndpointId: 1 }, { Id: 3, Name: 'stack-name-with-env', EndpointId: 1, Env: [{key1: "value1"}] }]
+        body: [
+          { Id: 2, Name: 'stack-name', EndpointId: 1 },
+          {
+            Id: 3,
+            Name: 'stack-name-with-env',
+            EndpointId: 1,
+            Env: [{ name: 'keyName', value: 'value1' }]
+          }
+        ]
       }
     })
 
@@ -185,7 +193,7 @@ describe('deployStack', () => {
         Authorization: 'Bearer token',
         'content-type': 'application/json;charset=utf-8'
       },
-      body: '{"env":[{"key1":"value1"}],"stackFileContent":"version: \'3.7\'\\n\\nservices:\\n  server:\\n    image: ghcr.io/username/repo:sha-0142c14\\n    deploy:\\n      update_config:\\n        order: start-first\\n"}'
+      body: '{"env":[{"name":"keyName","value":"value1"}],"stackFileContent":"version: \'3.7\'\\n\\nservices:\\n  server:\\n    image: ghcr.io/username/repo:sha-0142c14\\n    deploy:\\n      update_config:\\n        order: start-first\\n"}'
     })
   })
 

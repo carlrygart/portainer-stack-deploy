@@ -169,6 +169,7 @@ async function deployStack({ portainerHost, username, password, swarmId, endpoin
                 id: existingStack.Id,
                 endpointId: existingStack.EndpointId,
                 body: {
+                    env: existingStack.Env,
                     stackFileContent: stackDefinitionToDeploy
                 }
             });
