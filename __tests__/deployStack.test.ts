@@ -5,12 +5,16 @@ jest.mock('@actions/core')
 
 process.env.GITHUB_WORKSPACE = './'
 
+const BASE_API_URL = 'http://mock.url/api'
+
 describe('deployStack', () => {
-  beforeAll(() => {
-    nock('http://mock.url/api').persist().post('/auth').reply(200, { jwt: 'token' })
-    nock('http://mock.url/api').persist().post('/auth/logout').reply(200)
-    nock('http://mock.url/api')
-      .persist()
+  beforeEach(() => {
+    nock(BASE_API_URL)
+      .post('/auth', { username: 'username', password: 'password' })
+      .reply(200, { jwt: 'token' })
+    nock(BASE_API_URL).matchHeader('authorization', 'Bearer token').post('/auth/logout').reply(204)
+    nock(BASE_API_URL)
+      .matchHeader('authorization', 'Bearer token')
       .get('/stacks')
       .reply(200, [
         { Id: 2, Name: 'stack-name', EndpointId: 1 },
@@ -23,8 +27,12 @@ describe('deployStack', () => {
       ])
   })
 
+  afterEach(() => {
+    nock.cleanAll()
+  })
+
   test('deploy swarm stack', async () => {
-    const createSwarmStackMock = nock('http://mock.url/api')
+    nock(BASE_API_URL)
       .matchHeader('authorization', 'Bearer token')
       .matchHeader('content-type', 'application/json')
       .post('/stacks', {
@@ -51,11 +59,11 @@ describe('deployStack', () => {
       image: 'ghcr.io/username/repo:sha-0142c14'
     })
 
-    createSwarmStackMock.isDone()
+    nock.isDone()
   })
 
   test('deploy compose stack', async () => {
-    const createComposeStackMock = nock('http://mock.url/api')
+    nock(BASE_API_URL)
       .matchHeader('authorization', 'Bearer token')
       .matchHeader('content-type', 'application/json')
       .post('/stacks', {
@@ -80,11 +88,11 @@ describe('deployStack', () => {
       image: 'ghcr.io/username/repo:sha-0142c14'
     })
 
-    createComposeStackMock.isDone()
+    nock.isDone()
   })
 
   test('deploy existing stack', async () => {
-    const updateStackMock = nock('http://mock.url/api')
+    nock(BASE_API_URL)
       .matchHeader('authorization', 'Bearer token')
       .matchHeader('content-type', 'application/json')
       .put('/stacks/2', {
@@ -106,11 +114,11 @@ describe('deployStack', () => {
       image: 'ghcr.io/username/repo:sha-0142c14'
     })
 
-    updateStackMock.isDone()
+    nock.isDone()
   })
 
   test('deploy existing stack with env', async () => {
-    const updateStackMockWithEnv = nock('http://mock.url/api')
+    nock(BASE_API_URL)
       .matchHeader('authorization', 'Bearer token')
       .matchHeader('content-type', 'application/json')
       .put('/stacks/3', {
@@ -133,11 +141,11 @@ describe('deployStack', () => {
       image: 'ghcr.io/username/repo:sha-0142c14'
     })
 
-    updateStackMockWithEnv.isDone()
+    nock.isDone()
   })
 
   test('deploy with explicit endpoint id', async () => {
-    const createComposeStackWithEndpointMock = nock('http://mock.url/api')
+    nock(BASE_API_URL)
       .matchHeader('authorization', 'Bearer token')
       .matchHeader('content-type', 'application/json')
       .post('/stacks', {
@@ -162,11 +170,11 @@ describe('deployStack', () => {
       image: 'ghcr.io/username/repo:sha-0142c14'
     })
 
-    createComposeStackWithEndpointMock.isDone()
+    nock.isDone()
   })
 
   test('deploy without specific image', async () => {
-    const createComposeStackMock = nock('http://mock.url/api')
+    nock(BASE_API_URL)
       .matchHeader('authorization', 'Bearer token')
       .matchHeader('content-type', 'application/json')
       .post('/stacks', {
@@ -190,11 +198,11 @@ describe('deployStack', () => {
       stackDefinitionFile: 'example-stack-definition.yml'
     })
 
-    createComposeStackMock.isDone()
+    nock.isDone()
   })
 
   test('deploy with template variables', async () => {
-    const createComposeStackMock = nock('http://mock.url/api')
+    nock(BASE_API_URL)
       .matchHeader('authorization', 'Bearer token')
       .matchHeader('content-type', 'application/json')
       .post('/stacks', {
@@ -219,6 +227,6 @@ describe('deployStack', () => {
       templateVariables: { username: 'testUsername' }
     })
 
-    createComposeStackMock.isDone()
+    nock.isDone()
   })
 })
