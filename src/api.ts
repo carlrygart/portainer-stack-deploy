@@ -4,6 +4,7 @@ type EnvVariables = Array<{
   name: string
   value: string
 }>
+
 type EndpointId = number
 
 type StackData = {
@@ -17,17 +18,6 @@ type CreateStackParams = { type: number; method: string; endpointId: EndpointId 
 type CreateStackBody = { name: string; stackFileContent: string; swarmID?: string }
 type UpdateStackParams = { endpointId: EndpointId }
 type UpdateStackBody = { env: EnvVariables; stackFileContent: string }
-
-export type MappersmithErrorObject = {
-  responseStatus?: number
-  responseData?: string
-  originalRequest?: {
-    methodDescriptor?: {
-      path?: string
-      method?: string
-    }
-  }
-}
 
 export class PortainerApi {
   private axiosInstance
