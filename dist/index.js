@@ -37,7 +37,7 @@ class PortainerApi {
         await this.axiosInstance.post('/stacks', body, { params });
     }
     async updateStack(id, params, body) {
-        await this.axiosInstance.post(`/stacks/${id}`, body, { params });
+        await this.axiosInstance.put(`/stacks/${id}`, body, { params });
     }
 }
 exports.PortainerApi = PortainerApi;

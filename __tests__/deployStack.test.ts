@@ -87,7 +87,7 @@ describe('deployStack', () => {
     const updateStackMock = nock('http://mock.url/api')
       .matchHeader('authorization', 'Bearer token')
       .matchHeader('content-type', 'application/json')
-      .post('/stacks/2', {
+      .put('/stacks/2', {
         stackFileContent:
           "version: '3.7'\n\nservices:\n  server:\n    image: ghcr.io/username/repo:sha-0142c14\n    deploy:\n      update_config:\n        order: start-first\n"
       })
@@ -113,7 +113,7 @@ describe('deployStack', () => {
     const updateStackMockWithEnv = nock('http://mock.url/api')
       .matchHeader('authorization', 'Bearer token')
       .matchHeader('content-type', 'application/json')
-      .post('/stacks/3', {
+      .put('/stacks/3', {
         env: [{ name: 'keyName', value: 'value1' }],
         stackFileContent:
           "version: '3.7'\n\nservices:\n  server:\n    image: ghcr.io/username/repo:sha-0142c14\n    deploy:\n      update_config:\n        order: start-first\n"

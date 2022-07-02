@@ -61,6 +61,6 @@ export class PortainerApi {
   }
 
   async updateStack(id: number, params: UpdateStackParams, body: UpdateStackBody): Promise<void> {
-    await this.axiosInstance.post(`/stacks/${id}`, body, { params })
+    await this.axiosInstance.put(`/stacks/${id}`, body, { params })
   }
 }
