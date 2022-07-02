@@ -1,39 +1,22 @@
-import forge, { Client, Middleware, Response, setContext } from 'mappersmith'
-import EncodeJson from 'mappersmith/middleware/encode-json'
+import axios from 'axios'
 
-type ClientConfig = {
-  host: string
-}
+type EnvVariables = Array<{
+  name: string
+  value: string
+}>
+type EndpointId = number
 
-type PortainerResources = {
-  Auth: {
-    login: Response
-    logout: Response
-  }
-  Stacks: {
-    all: Response
-    updateStack: Response
-    createStack: Response
-  }
-}
-
-type AuthContext = {
-  jwtToken: string
-}
-
-type AuthData = {
-  jwt: string
-}
-
-export type StackData = {
+type StackData = {
   Id: number
   Name: string
-  EndpointId: number
-  Env: Array<{
-    name: string
-    value: string
-  }>
+  EndpointId: EndpointId
+  Env: EnvVariables
 }
+
+type CreateStackParams = { type: number; method: string; endpointId: EndpointId }
+type CreateStackBody = { name: string; stackFileContent: string; swarmID?: string }
+type UpdateStackParams = { endpointId: EndpointId }
+type UpdateStackBody = { env: EnvVariables; stackFileContent: string }
 
 export type MappersmithErrorObject = {
   responseStatus?: number
@@ -46,58 +29,38 @@ export type MappersmithErrorObject = {
   }
 }
 
-const AccessTokenMiddleware: Middleware = ({ context }) => ({
-  request(request) {
-    return request.enhance({
-      headers: { Authorization: `Bearer ${(context as AuthContext).jwtToken}` }
+export class PortainerApi {
+  private axiosInstance
+
+  constructor(host: string) {
+    this.axiosInstance = axios.create({
+      baseURL: `${host}/api`
     })
   }
-})
 
-const SetAccessTokenMiddleware: Middleware = () => ({
-  async response(next) {
-    return next().then(response => {
-      const { jwt }: AuthData = response.data()
-      setContext({ jwtToken: jwt })
-      return response
+  async login({ username, password }: { username: string; password: string }): Promise<void> {
+    const { data } = await this.axiosInstance.post<{ jwt: string }>('/auth', {
+      username,
+      password
     })
+    this.axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${data.jwt}`
   }
-})
 
-export function createPortainerApi({ host }: ClientConfig): Client<PortainerResources> {
-  return forge({
-    clientId: 'portainerClient',
-    host,
-    middleware: [EncodeJson],
-    resources: {
-      Auth: {
-        login: {
-          path: '/auth',
-          method: 'post',
-          middleware: [SetAccessTokenMiddleware]
-        },
-        logout: {
-          path: '/auth/logout',
-          method: 'post',
-          middleware: [AccessTokenMiddleware]
-        }
-      },
-      Stacks: {
-        all: {
-          path: '/stacks',
-          middleware: [AccessTokenMiddleware]
-        },
-        createStack: {
-          path: '/stacks',
-          method: 'post',
-          middleware: [AccessTokenMiddleware]
-        },
-        updateStack: {
-          path: '/stacks/{id}',
-          method: 'put',
-          middleware: [AccessTokenMiddleware]
-        }
-      }
-    }
-  })
+  async logout(): Promise<void> {
+    await this.axiosInstance.post('/auth/logout')
+    this.axiosInstance.defaults.headers.common['Authorization'] = ''
+  }
+
+  async getStacks(): Promise<StackData[]> {
+    const { data } = await this.axiosInstance.get<StackData[]>('/stacks')
+    return data
+  }
+
+  async createStack(params: CreateStackParams, body: CreateStackBody): Promise<void> {
+    await this.axiosInstance.post('/stacks', body, { params })
+  }
+
+  async updateStack(id: number, params: UpdateStackParams, body: UpdateStackBody): Promise<void> {
+    await this.axiosInstance.put(`/stacks/${id}`, body, { params })
+  }
 }

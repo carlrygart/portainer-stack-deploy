@@ -1,4 +1,4 @@
-import { createPortainerApi, StackData } from './api'
+import { PortainerApi } from './api'
 import path from 'path'
 import fs from 'fs'
 import Handlebars from 'handlebars'
@@ -59,7 +59,7 @@ export async function deployStack({
   templateVariables,
   image
 }: DeployStack): Promise<void> {
-  const portainerApi = createPortainerApi({ host: `${portainerHost}/api` })
+  const portainerApi = new PortainerApi(portainerHost)
 
   const stackDefinitionToDeploy = generateNewStackDefinition(
     stackDefinitionFile,
@@ -69,41 +69,43 @@ export async function deployStack({
   core.debug(stackDefinitionToDeploy)
 
   core.info('Logging in to Portainer instance...')
-  await portainerApi.Auth.login({
-    body: {
-      username,
-      password
-    }
+  await portainerApi.login({
+    username,
+    password
   })
 
   try {
-    const allStacks: StackData[] = (await portainerApi.Stacks.all()).data()
-    const existingStack = allStacks.find((s: StackData) => s.Name === stackName)
+    const allStacks = await portainerApi.getStacks()
+    const existingStack = allStacks.find(s => s.Name === stackName)
 
     if (existingStack) {
       core.info(`Found existing stack with name: ${stackName}`)
       core.info('Updating existing stack...')
-      await portainerApi.Stacks.updateStack({
-        id: existingStack.Id,
-        endpointId: existingStack.EndpointId,
-        body: {
+      await portainerApi.updateStack(
+        existingStack.Id,
+        {
+          endpointId: existingStack.EndpointId
+        },
+        {
           env: existingStack.Env,
           stackFileContent: stackDefinitionToDeploy
         }
-      })
+      )
       core.info('Successfully updated existing stack')
     } else {
       core.info('Deploying new stack...')
-      await portainerApi.Stacks.createStack({
-        type: swarmId ? StackType.SWARM : StackType.COMPOSE,
-        method: 'string',
-        endpointId,
-        body: {
+      await portainerApi.createStack(
+        {
+          type: swarmId ? StackType.SWARM : StackType.COMPOSE,
+          method: 'string',
+          endpointId
+        },
+        {
           name: stackName,
           stackFileContent: stackDefinitionToDeploy,
           swarmID: swarmId ? swarmId : undefined
         }
-      })
+      )
       core.info(`Successfully created new stack with name: ${stackName}`)
     }
   } catch (error) {
@@ -111,6 +113,6 @@ export async function deployStack({
     throw error
   } finally {
     core.info(`Logging out from Portainer instance...`)
-    await portainerApi.Auth.logout()
+    await portainerApi.logout()
   }
 }
