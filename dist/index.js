@@ -186,9 +186,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
+const axios_1 = __importDefault(__nccwpck_require__(6545));
 const deployStack_1 = __nccwpck_require__(2090);
 async function run() {
     try {
@@ -233,6 +237,10 @@ async function run() {
         core.info('✅ Deployment done');
     }
     catch (error) {
+        if (axios_1.default.isAxiosError(error) && error.response) {
+            const { status, data, config: { url, method } } = error.response;
+            return core.setFailed(`AxiosError HTTP Status ${status} (${method} ${url}): ${data}`);
+        }
         return core.setFailed(error);
     }
 }

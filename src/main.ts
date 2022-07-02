@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import axios from 'axios'
 import { deployStack } from './deployStack'
 
 export async function run(): Promise<void> {
@@ -44,6 +45,14 @@ export async function run(): Promise<void> {
     })
     core.info('✅ Deployment done')
   } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const {
+        status,
+        data,
+        config: { url, method }
+      } = error.response
+      return core.setFailed(`AxiosError HTTP Status ${status} (${method} ${url}): ${data}`)
+    }
     return core.setFailed(error as Error)
   }
 }
